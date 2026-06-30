@@ -1,5 +1,5 @@
 import md5 from "md5";
-import type { ModelConfig } from "./types";
+import type { ModelConfig, ModelGatewayConfig } from "./types";
 
 const DB_NAME = "taima-ai-cache";
 const STORE_NAME = "responses";
@@ -41,26 +41,28 @@ export const clearAiCache = async () => {
   });
 };
 
-const endpointUrl = (config: ModelConfig) => {
-  const base = config.baseUrl.replace(/\/$/, "");
-  const endpoint = (config.endpoint || "/v1/chat/completions").startsWith("/")
-    ? config.endpoint || "/v1/chat/completions"
-    : `/${config.endpoint}`;
+const endpointUrl = (gateway: ModelGatewayConfig) => {
+  const base = gateway.baseUrl.replace(/\/$/, "");
+  const endpoint = (gateway.endpoint || "/v1/chat/completions").startsWith("/")
+    ? gateway.endpoint || "/v1/chat/completions"
+    : `/${gateway.endpoint}`;
   return `${base}${endpoint}`;
 };
 
-export const callModel = async (config: ModelConfig, prompt: string) => {
-  if (!config.apiKey || !config.baseUrl || !config.model) {
+export const callModel = async (gateway: ModelGatewayConfig, config: ModelConfig, prompt: string) => {
+  if (!gateway.apiKey || !gateway.baseUrl || !config.model) {
     throw new Error(`${config.label} 缺少 API_KEY、baseUrl 或 model。`);
   }
-  const cacheKey = md5(JSON.stringify({ config: { baseUrl: config.baseUrl, endpoint: config.endpoint, model: config.model }, prompt }));
+  const cacheKey = md5(
+    JSON.stringify({ gateway: { baseUrl: gateway.baseUrl, endpoint: gateway.endpoint }, model: config.model, prompt }),
+  );
   const cached = await readCache(cacheKey);
   if (cached) return { content: cached, cached: true };
-  const response = await fetch(endpointUrl(config), {
+  const response = await fetch(endpointUrl(gateway), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${config.apiKey}`,
+      Authorization: `Bearer ${gateway.apiKey}`,
     },
     body: JSON.stringify({
       model: config.model,

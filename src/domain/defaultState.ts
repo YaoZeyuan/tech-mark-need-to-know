@@ -18,6 +18,7 @@ import type {
   DecisionBook,
   FinancialReport,
   ModelConfig,
+  ModelGatewayConfig,
   ModelSlotKey,
   ProductId,
   ProductParameters,
@@ -117,11 +118,14 @@ const createQuarterReport = (): QuarterReport => ({
   notes: "",
 });
 
-const createModelConfig = (label: string): ModelConfig => ({
-  label,
+const createModelGateway = (): ModelGatewayConfig => ({
   apiKey: "",
   baseUrl: "",
   endpoint: "/v1/chat/completions",
+});
+
+const createModelConfig = (label: string): ModelConfig => ({
+  label,
   model: "",
   remark: "",
 });
@@ -146,6 +150,7 @@ export const createDefaultState = (): AppState => ({
   reports: { "1": createQuarterReport() },
   costTable: JSON.parse(JSON.stringify(COST_TABLE)) as AppState["costTable"],
   promptTemplates: { ...DEFAULT_PROMPT_TEMPLATES },
+  modelGateway: createModelGateway(),
   modelConfigs: {
     advisor1: createModelConfig("参谋模型1"),
     advisor2: createModelConfig("参谋模型2"),

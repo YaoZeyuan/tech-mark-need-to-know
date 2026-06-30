@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { RouterLink, RouterView, useRoute } from "vue-router";
+import { computed, watch } from "vue";
+import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
 import { ROLE_DEFINITIONS } from "./domain/constants";
+import { state } from "./domain/store";
 
 const route = useRoute();
+const router = useRouter();
 const navItems = computed(() => [
   { path: "/", label: "总览" },
   ...ROLE_DEFINITIONS.map((role) => ({ path: role.path, label: role.name })),
@@ -12,11 +14,45 @@ const navItems = computed(() => [
   { path: "/prompts", label: "Prompt" },
   { path: "/settings", label: "设置" },
 ]);
+
+const navTarget = (path: string) => ({
+  path,
+  query: {
+    q: String(state.currentQuarter),
+    ...(path === "/prompts" && typeof route.query.role === "string" ? { role: route.query.role } : {}),
+  },
+});
+
+const quarterFromQuery = (value: unknown) => {
+  const raw = typeof value === "string" ? value : undefined;
+  const quarter = Number(raw);
+  return Number.isInteger(quarter) && quarter > 0 ? quarter : undefined;
+};
+
+watch(
+  () => route.query.q,
+  (value) => {
+    const quarter = quarterFromQuery(value);
+    if (quarter && quarter !== state.currentQuarter) {
+      state.currentQuarter = quarter;
+    }
+  },
+);
+
+watch(
+  [() => state.currentQuarter, () => route.path, () => route.query.q],
+  ([quarter]) => {
+    const q = String(quarter);
+    if (route.query.q === q) return;
+    void router.replace({ query: { ...route.query, q } });
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
   <a-layout class="app-shell">
-    <a-layout-sider class="app-sidebar" :width="232" breakpoint="lg" collapsible>
+    <a-layout-sider class="app-sidebar" :width="232">
       <div class="brand">
         <div class="brand-mark">TM</div>
         <div>
@@ -29,7 +65,7 @@ const navItems = computed(() => [
           v-for="item in navItems"
           :key="item.path"
           :class="{ active: route.path === item.path }"
-          :to="item.path"
+          :to="navTarget(item.path)"
         >
           {{ item.label }}
         </RouterLink>

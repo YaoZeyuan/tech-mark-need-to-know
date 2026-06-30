@@ -73,16 +73,34 @@ const clearCache = async () => {
 
     <a-tabs default-active-key="models">
       <a-tab-pane key="models" title="模型配置">
+        <section class="grid grid-2">
+          <div class="panel">
+            <h2 class="panel-title">共享 OpenAI 兼容网关</h2>
+            <a-form :model="state.modelGateway" layout="vertical">
+              <a-form-item label="baseUrl">
+                <a-input v-model="state.modelGateway.baseUrl" placeholder="https://api.example.com" />
+              </a-form-item>
+              <a-form-item label="endpoint">
+                <a-input v-model="state.modelGateway.endpoint" placeholder="/v1/chat/completions" />
+              </a-form-item>
+              <a-form-item label="API_KEY">
+                <a-input-password v-model="state.modelGateway.apiKey" />
+              </a-form-item>
+            </a-form>
+          </div>
+          <div class="panel">
+            <h2 class="panel-title">模型槽位</h2>
+            <p class="muted">所有槽位共用左侧 baseUrl、endpoint 和 API_KEY；每个槽位只配置 model 与备注。</p>
+          </div>
+        </section>
+
         <section class="panel">
-          <h2 class="panel-title">OpenAI 兼容模型槽位</h2>
+          <h2 class="panel-title">参谋与决策模型</h2>
           <div class="grid grid-2">
             <div v-for="config in state.modelConfigs" :key="config.label" class="model-box">
               <h3>{{ config.label }}</h3>
               <a-form :model="config" layout="vertical">
-                <a-form-item label="baseUrl"><a-input v-model="config.baseUrl" placeholder="https://api.example.com" /></a-form-item>
-                <a-form-item label="endpoint"><a-input v-model="config.endpoint" placeholder="/v1/chat/completions" /></a-form-item>
                 <a-form-item label="model"><a-input v-model="config.model" /></a-form-item>
-                <a-form-item label="API_KEY"><a-input-password v-model="config.apiKey" /></a-form-item>
                 <a-form-item label="备注"><a-input v-model="config.remark" /></a-form-item>
               </a-form>
             </div>

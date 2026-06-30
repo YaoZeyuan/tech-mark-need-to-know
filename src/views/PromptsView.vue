@@ -1,16 +1,45 @@
 <script setup lang="ts">
 import { Message } from "@arco-design/web-vue";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { ROLE_DEFINITIONS } from "../domain/constants";
 import { callModel } from "../domain/ai";
 import { buildRolePrompt, buildSummaryPrompt } from "../domain/prompt";
 import { state } from "../domain/store";
 import type { ModelSlotKey, RoleKey } from "../domain/types";
 
-const selectedRole = ref<RoleKey>("ceo");
+const route = useRoute();
+const router = useRouter();
 const loading = ref(false);
 const advisorSlots: ModelSlotKey[] = ["advisor1", "advisor2", "advisor3"];
+
+const roleFromQuery = (value: unknown): RoleKey | undefined => {
+  if (typeof value !== "string") return undefined;
+  return ROLE_DEFINITIONS.some((role) => role.key === value) ? (value as RoleKey) : undefined;
+};
+
+const selectedRole = ref<RoleKey>(roleFromQuery(route.query.role) ?? "ceo");
 const currentRun = computed(() => state.aiRuns[selectedRole.value]);
+
+watch(
+  () => route.query.role,
+  (value) => {
+    const role = roleFromQuery(value);
+    if (role && role !== selectedRole.value) {
+      selectedRole.value = role;
+    }
+  },
+);
+
+watch(
+  [selectedRole, () => route.path, () => route.query.role],
+  ([role]) => {
+    if (route.path !== "/prompts") return;
+    if (route.query.role === role) return;
+    void router.replace({ query: { ...route.query, role } });
+  },
+  { immediate: true },
+);
 
 const generateRolePrompt = () => {
   currentRun.value.rolePrompt = buildRolePrompt(selectedRole.value);
@@ -34,7 +63,7 @@ const runApiWorkflow = async () => {
     currentRun.value.rolePrompt = prompt;
     const advisorResults = await Promise.all(
       advisorSlots.map(async (slot) => {
-        const result = await callModel(state.modelConfigs[slot], prompt);
+        const result = await callModel(state.modelGateway, state.modelConfigs[slot], prompt);
         return { slot, content: `${result.cached ? "[缓存命中]\n" : ""}${result.content}` };
       }),
     );
@@ -42,7 +71,7 @@ const runApiWorkflow = async () => {
       currentRun.value.advisorResponses[result.slot] = result.content;
     }
     currentRun.value.summaryPrompt = buildSummaryPrompt(selectedRole.value);
-    const decisionResult = await callModel(state.modelConfigs.decision, currentRun.value.summaryPrompt);
+    const decisionResult = await callModel(state.modelGateway, state.modelConfigs.decision, currentRun.value.summaryPrompt);
     currentRun.value.summaryResponse = `${decisionResult.cached ? "[缓存命中]\n" : ""}${decisionResult.content}`;
     Message.success("AI 并发参谋与决策汇总已完成");
   } catch (error) {

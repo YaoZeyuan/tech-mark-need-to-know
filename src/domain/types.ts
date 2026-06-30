@@ -127,11 +127,14 @@ export interface CostTableRow {
   toN?: number;
 }
 
-export interface ModelConfig {
-  label: string;
+export interface ModelGatewayConfig {
   apiKey: string;
   baseUrl: string;
   endpoint: string;
+}
+
+export interface ModelConfig {
+  label: string;
   model: string;
   remark: string;
 }
@@ -156,6 +159,7 @@ export interface AppState {
   reports: Record<string, QuarterReport>;
   costTable: CostTableRow[];
   promptTemplates: Record<PromptTemplateKey, string>;
+  modelGateway: ModelGatewayConfig;
   modelConfigs: Record<ModelSlotKey, ModelConfig>;
   aiRuns: Record<RoleKey, AiRunState>;
 }
