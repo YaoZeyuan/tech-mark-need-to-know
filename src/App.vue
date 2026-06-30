@@ -39,14 +39,21 @@ watch(
   },
 );
 
+const syncQuarterQuery = (quarter: number) => {
+  const q = String(quarter);
+  if (route.query.q === q) return;
+  void router.replace({ path: route.path, query: { ...route.query, q } });
+};
+
+void router.isReady().then(() => {
+  syncQuarterQuery(state.currentQuarter);
+});
+
 watch(
   [() => state.currentQuarter, () => route.path, () => route.query.q],
   ([quarter]) => {
-    const q = String(quarter);
-    if (route.query.q === q) return;
-    void router.replace({ query: { ...route.query, q } });
+    syncQuarterQuery(quarter);
   },
-  { immediate: true },
 );
 </script>
 
