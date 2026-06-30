@@ -1,5 +1,50 @@
-# Vue 3 + TypeScript + Vite
+# 态马商战决策系统
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+这是一个用于态马商战团队协作的纯前端决策工作台。系统帮助团队结构化录入季度报告、角色决策、教材规则和 AI 建议，最终整理成可提交的季度决策书。
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 主要功能
+
+- 总览页：查看当前季度、完整度、角色状态和关键风险。
+- 角色页：CEO、CMO、COO、CFO、CTO 分别录入本角色输入，并就地生成角色 Prompt。
+- 决策书：汇总价格、发货、促销、研发、生产地和财务决策。
+- 报告页：录入季度财务报告、库存、市场研究和竞争对手数据。
+- Prompt 工作台：集中生成 Prompt、复制给外部 AI，或通过 OpenAI 兼容 API 调用模型。
+- 设置页：维护模型配置、Prompt 模板、成本规则、基础配置和导入导出。
+- 说明页：通过 `/readme` 阅读本地打包的使用指南和态马商战说明。
+
+## 本地启动
+
+```bash
+pnpm install
+pnpm dev
+```
+
+默认开发服务由 Vite 启动，浏览器访问终端输出的本地地址即可。
+
+## 构建
+
+```bash
+pnpm build
+```
+
+构建流程会先运行 TypeScript 校验和 Vite 打包。`readme.html` 作为第二个 HTML 入口参与打包，随后 `scripts/copy-readme.mjs` 会兜底确认 `dist/readme.html` 存在。
+
+## 数据存储
+
+- 业务数据、Prompt 模板和模型配置保存在浏览器 LocalStorage。
+- AI 请求缓存保存在 IndexedDB，并使用 `md5` 根据请求内容生成缓存键。
+- 当前版本不依赖后端数据库，也不实现本机经营模拟器。
+
+## 常用页面
+
+- `/`：季度总览。
+- `/ceo`、`/cmo`、`/coo`、`/cfo`、`/cto`：角色决策页。
+- `/decision-book`：季度决策书。
+- `/reports`：季度报告录入。
+- `/prompts`：Prompt 工作台。
+- `/settings`：系统设置。
+- `/readme`：使用指南和态马商战说明。
+
+## 协作建议
+
+每个季度先录入报告，再由各角色在角色页完成输入和 AI 辅助分析，最后由 CEO 在决策书页检查并导出 Markdown。跨设备协作时，可在设置页导出 JSON，再在另一台设备导入覆盖当前状态。

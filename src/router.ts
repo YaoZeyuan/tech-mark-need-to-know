@@ -5,6 +5,7 @@ import DecisionBookView from "./views/DecisionBookView.vue";
 import ReportsView from "./views/ReportsView.vue";
 import PromptsView from "./views/PromptsView.vue";
 import SettingsView from "./views/SettingsView.vue";
+import ReadmeView from "./views/ReadmeView.vue";
 import type { RoleKey } from "./domain/types";
 
 const roleRoute = (path: string, role: RoleKey) => ({
@@ -26,5 +27,6 @@ export const router = createRouter({
     { path: "/reports", component: ReportsView },
     { path: "/prompts", component: PromptsView },
     { path: "/settings", component: SettingsView },
+    { path: "/readme", component: ReadmeView },
   ],
 });
