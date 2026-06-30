@@ -13,13 +13,16 @@ const navItems = computed(() => [
   { path: "/reports", label: "报告" },
   { path: "/prompts", label: "Prompt" },
   { path: "/settings", label: "设置" },
+  { path: "/readme", label: "态马说明" },
 ]);
 
 const navTarget = (path: string) => ({
   path,
   query: {
     q: String(state.currentQuarter),
-    ...(path === "/prompts" && typeof route.query.role === "string" ? { role: route.query.role } : {}),
+    ...(path === "/prompts" && typeof route.query.role === "string"
+      ? { role: route.query.role }
+      : {}),
   },
 });
 
