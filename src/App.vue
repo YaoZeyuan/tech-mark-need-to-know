@@ -85,7 +85,7 @@ watch(
       <a-layout-header class="topbar">
         <div>
           <strong>结构化录入、报表校验、AI 辅助决策</strong>
-          <span>首版不做本机经营模拟</span>
+          <span>暂不提供经营模拟能力</span>
         </div>
       </a-layout-header>
       <a-layout-content class="content">
